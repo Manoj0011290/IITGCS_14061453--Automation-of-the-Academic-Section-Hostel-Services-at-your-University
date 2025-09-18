@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Portal Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* KGF Theme - Dark, Gold, Gritty */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            background-image: 
+                radial-gradient(circle at top right, rgba(212, 175, 55, 0.15), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(212, 175, 55, 0.15), transparent 40%),
+                url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+            overflow: hidden;
+        }
+        .form-container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.2);
+            animation: fadeInFromBottom 1s ease-out;
+        }
+        .form-title {
+            font-family: 'Cinzel', serif;
+            color: #D4AF37; /* Gold color */
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+        }
+        .form-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: #fff;
+        }
+        .form-input:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        .role-button {
+            background: transparent; border: 1px solid rgba(212, 175, 55, 0.4); color: rgba(212, 175, 55, 0.8);
+            transition: all 0.3s; cursor: pointer;
+        }
+        .role-button:hover { background-color: rgba(212, 175, 55, 0.1); border-color: #D4AF37; }
+        .role-button.active { background-color: #D4AF37; color: #111; font-weight: bold; border-color: #D4AF37; }
+        .form-button { background: linear-gradient(45deg, #D4AF37, #B8860B); color: #111; font-weight: bold; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md">
+        <div class="form-container rounded-2xl shadow-2xl p-8">
+            <form id="signup-form" class="space-y-4">
+                <h2 class="form-title text-3xl font-bold text-center">Create Account</h2>
+                <div id="message" class="hidden p-3 text-center text-sm rounded-lg"></div>
+                 <div>
+                    <label for="fullName" class="text-sm font-medium text-gray-300 block mb-2">Full Name</label>
+                    <input type="text" id="fullName" class="form-input w-full px-4 py-2 rounded-lg" placeholder="John Doe" required>
+                </div>
+                <div>
+                    <label for="email" class="text-sm font-medium text-gray-300 block mb-2">Email Address <span class="text-xs text-gray-400">(must be @university.edu)</span></label>
+                    <input type="email" id="email" class="form-input w-full px-4 py-2 rounded-lg" placeholder="u_name@university.edu" required>
+                </div>
+                 <div>
+                    <label for="universityCode" class="text-sm font-medium text-gray-300 block mb-2">University Code</label>
+                    <input type="text" id="universityCode" class="form-input w-full px-4 py-2 rounded-lg" placeholder="Enter invitation code" required>
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-300 block mb-2">Password</label>
+                    <input type="password" id="password" class="form-input w-full px-4 py-2 rounded-lg" placeholder="••••••••" required>
+                </div>
+                <div>
+                    <label for="confirmPassword" class="text-sm font-medium text-gray-300 block mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-input w-full px-4 py-2 rounded-lg" placeholder="••••••••" required>
+                </div>
+                 <div>
+                    <label class="text-sm font-medium text-gray-300 block mb-2">Select Role</label>
+                     <div id="role-selector" class="grid grid-cols-2 gap-2">
+                        <button type="button" data-role="Student" class="role-button p-2 rounded-lg text-sm">Student</button>
+                        <button type="button" data-role="Faculty" class="role-button p-2 rounded-lg text-sm">Faculty</button>
+                    </div>
+                </div>
+                <button type="submit" class="form-button w-full py-3 font-semibold rounded-lg shadow-md !mt-6">Create Account</button>
+                <p class="text-sm text-center text-gray-300">
+                    Already have an account? <a href="Login.html" class="font-medium hover:underline text-yellow-500">Log in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signup-form');
+        const messageDiv = document.getElementById('message');
+        let selectedRole = 'Student'; // Default role
+
+        // --- Role Selector Logic ---
+        const roleSelector = document.getElementById('role-selector');
+        const roleButtons = roleSelector.querySelectorAll('.role-button');
+        
+        roleButtons[0].classList.add('active'); // Set default active button
+
+        roleSelector.addEventListener('click', (e) => {
+            const targetButton = e.target.closest('.role-button');
+            if (targetButton) {
+                selectedRole = targetButton.dataset.role;
+                roleButtons.forEach(button => button.classList.remove('active'));
+                targetButton.classList.add('active');
+            }
+        });
+
+        // --- Form Submission Logic ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const universityCode = document.getElementById('universityCode').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, password, role: selectedRole, universityCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    form.reset();
+                    roleButtons.forEach(b => b.classList.remove('active'));
+                    roleButtons[0].classList.add('active');
+                    selectedRole = 'Student';
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Could not connect to the server. Please try again later.', 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            messageDiv.textContent = message;
+            const successClasses = 'bg-green-900/50 text-green-300 border border-green-500/50';
+            const errorClasses = 'bg-red-900/50 text-red-300 border border-red-500/50';
+            messageDiv.className = `p-3 text-center text-sm rounded-lg ${type === 'success' ? successClasses : errorClasses}`;
+        }
+    </script>
+</body>
+</html>

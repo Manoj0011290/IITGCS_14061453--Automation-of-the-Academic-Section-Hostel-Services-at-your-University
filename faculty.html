@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - University Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* KGF Theme - Dark, Gold, Gritty */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            color: #EAEAEA;
+            background-image:
+                radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.1), transparent 40%),
+                url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+        }
+        .kgf-title { font-family: 'Cinzel', serif; color: #D4AF37; text-shadow: 0 0 10px rgba(212, 175, 55, 0.7); }
+        .sidebar { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-right: 2px solid rgba(212, 175, 55, 0.3); }
+        .nav-link { transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .nav-link:hover { background: rgba(212, 175, 55, 0.1); border-left-color: #D4AF37; color: #D4AF37; }
+        .nav-link.active { background: rgba(212, 175, 55, 0.2); border-left-color: #D4AF37; color: #D4AF37; font-weight: 700; }
+        .card { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.2); }
+        .kgf-button { background: linear-gradient(45deg, #D4AF37, #B8860B); color: #111; font-family: 'Cinzel', serif; font-weight: 700; transition: all 0.3s ease; }
+        .kgf-button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        .kgf-input, .kgf-textarea, .kgf-select { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: #fff; }
+        .kgf-input:focus, .kgf-textarea:focus, .kgf-select:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        /* --- FIX: Styles for the dropdown options --- */
+        .kgf-select option {
+            background-color: #1a1a1a;
+            color: #EAEAEA;
+        }
+        .table-header { background: rgba(212, 175, 55, 0.1); font-family: 'Cinzel', serif; font-weight: 700; color: #D4AF37; }
+        .table-row:hover { background: rgba(212, 175, 55, 0.05); }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-backdrop { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #111; border: 2px solid rgba(212, 175, 55, 0.4); animation: fadeIn 0.3s; }
+        .attendance-btn-group button { transition: all 0.2s; }
+        .attendance-btn-group button.active { transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar w-64 flex-shrink-0 overflow-y-auto">
+            <div class="p-6 text-center border-b border-gray-700/50 sticky top-0 bg-black/50 backdrop-blur-sm z-10">
+                <h1 class="kgf-title text-2xl tracking-widest">FACULTY</h1>
+                <p class="text-sm text-gray-400">PORTAL</p>
+            </div>
+            <nav id="sidebar-nav" class="mt-8">
+                <a href="#profile" class="nav-link active flex items-center px-6 py-3"><i class="fas fa-user-tie w-8 text-center"></i><span>Profile</span></a>
+                <a href="#courses" class="nav-link flex items-center px-6 py-3"><i class="fas fa-book-reader w-8 text-center"></i><span>Courses</span></a>
+                <a href="#assignments" class="nav-link flex items-center px-6 py-3"><i class="fas fa-pencil-ruler w-8 text-center"></i><span>Assignments</span></a>
+                <a href="#attendance" class="nav-link flex items-center px-6 py-3"><i class="fas fa-user-check w-8 text-center"></i><span>Attendance</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col">
+            <header class="flex items-center justify-between p-4 bg-gray-900/50 border-b border-gray-700/50">
+                <div><h2 id="welcome-message" class="text-xl font-bold text-gray-300">Welcome...</h2></div>
+                <button id="logout-button" class="kgf-button px-4 py-2 rounded-lg text-sm flex items-center"><i class="fas fa-sign-out-alt mr-2"></i>LOGOUT</button>
+            </header>
+
+            <div class="flex-1 p-8 overflow-y-auto">
+                <!-- Profile Section -->
+                <section id="profile" class="content-section active">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="kgf-title text-3xl">Faculty Profile</h2>
+                        <button onclick="openEditProfileModal()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-edit mr-2"></i>Edit Profile</button>
+                    </div>
+                    <div id="profile-content" class="card p-6 rounded-lg"><p>Loading profile...</p></div>
+                </section>
+                
+                <!-- Course Management Section -->
+                <section id="courses" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Course Management</h2>
+                    <div class="card p-6 rounded-lg">
+                        <h3 class="kgf-title text-xl mb-4">Your Assigned Courses</h3>
+                        <div id="assigned-courses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"><p>Loading courses...</p></div>
+                    </div>
+                </section>
+
+                <!-- Assignment Handling Section -->
+                <section id="assignments" class="content-section">
+                    <div id="assignments-list-view">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="kgf-title text-3xl">Assignment Management</h2>
+                            <button onclick="openCreateAssignmentModal()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Create Assignment</button>
+                        </div>
+                        <div id="assignments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p>Loading assignments...</p></div>
+                    </div>
+                    <div id="submissions-view" class="hidden">
+                        <div class="flex items-center mb-6">
+                            <button onclick="showAssignmentsListView()" class="text-yellow-400 hover:text-yellow-200 mr-4 text-xl"><i class="fas fa-arrow-left"></i></button>
+                            <h2 id="submissions-title" class="kgf-title text-3xl">Submissions</h2>
+                        </div>
+                        <div class="card p-6 rounded-lg overflow-x-auto">
+                            <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Student Name</th><th class="p-3">Submitted On</th><th class="p-3">Status</th><th class="p-3">Grade</th><th class="p-3">Actions</th></tr></thead><tbody id="submissions-table-body"></tbody></table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Attendance Section -->
+                <section id="attendance" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Attendance Tracking</h2>
+                    <div class="card p-6 rounded-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end border-b border-gray-700 pb-4 mb-4">
+                            <div><label class="text-sm text-gray-400">Select Course</label><select id="attendance-course-select" class="kgf-select w-full p-2 rounded-lg mt-1"></select></div>
+                            <div><label class="text-sm text-gray-400">Select Date</label><input type="date" id="attendance-date" class="kgf-input w-full p-2 rounded-lg mt-1"></div>
+                            <button onclick="handleFetchAttendance()" class="kgf-button w-full py-2 rounded-lg text-sm">Fetch Students</button>
+                        </div>
+                        <div id="attendance-sheet" class="hidden">
+                            <h3 class="kgf-title text-xl my-4">Attendance for <span id="attendance-sheet-title"></span></h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Student Name</th><th class="p-3">Status</th></tr></thead><tbody id="attendance-table-body"></tbody></table>
+                            </div>
+                            <div class="flex justify-end mt-6">
+                                <button onclick="handleSaveAttendance()" class="kgf-button px-6 py-2 rounded-lg">Save Attendance</button>
+                            </div>
+                        </div>
+                         <div id="attendance-placeholder" class="text-center py-10 text-gray-500"><p>Please select a course and date to begin.</p></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="edit-profile-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop"><div class="modal-content w-full max-w-lg p-8 rounded-2xl shadow-2xl"><h2 class="kgf-title text-2xl mb-6">Edit Profile & Security</h2><form id="edit-profile-form" class="space-y-4"><div><label class="text-sm text-gray-400">Contact Number</label><input type="text" id="contactNumber" class="kgf-input w-full p-2 rounded-lg mt-1"></div><div><label class="text-sm text-gray-400">Address</label><textarea id="address" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3"></textarea></div><hr class="border-gray-700"><div><label class="text-sm text-gray-400">New Password</label><input type="password" id="password" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="Leave blank to not change"></div><div class="flex justify-end gap-4 pt-4"><button type="button" onclick="closeEditProfileModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button><button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Save Changes</button></div></form></div></div>
+    <div id="create-assignment-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop"><div class="modal-content w-full max-w-lg p-8 rounded-2xl shadow-2xl"><h2 class="kgf-title text-2xl mb-6">Create New Assignment</h2><form id="create-assignment-form" class="space-y-4"><div><label class="text-sm text-gray-400">Course</label><select id="assignment-course" class="kgf-select w-full p-2 rounded-lg mt-1" required></select></div><div><label class="text-sm text-gray-400">Title</label><input type="text" id="assignment-title" class="kgf-input w-full p-2 rounded-lg mt-1" required></div><div><label class="text-sm text-gray-400">Description</label><textarea id="assignment-description" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3"></textarea></div><div><label class="text-sm text-gray-400">Due Date</label><input type="date" id="assignment-dueDate" class="kgf-input w-full p-2 rounded-lg mt-1" required></div><div class="flex justify-end gap-4 pt-4"><button type="button" onclick="closeCreateAssignmentModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button><button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Create</button></div></form></div></div>
+    <div id="grade-submission-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop"><div class="modal-content w-full max-w-lg p-8 rounded-2xl shadow-2xl"><h2 class="kgf-title text-2xl mb-6">Grade Submission</h2><form id="grade-submission-form" class="space-y-4"><input type="hidden" id="submissionId"><input type="hidden" id="activeAssignmentId"><div><label class="text-sm text-gray-400">Student</label><p id="grade-student-name" class="font-bold"></p></div><div><label class="text-sm text-gray-400">Submitted File</label><a id="grade-file-url" href="#" target="_blank" class="text-yellow-400 hover:underline">View Submission</a></div><hr class="border-gray-700"><div><label class="text-sm text-gray-400">Grade</label><input type="text" id="submission-grade" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="e.g., A+, B, 85/100" required></div><div><label class="text-sm text-gray-400">Feedback</label><textarea id="submission-feedback" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3"></textarea></div><div class="flex justify-end gap-4 pt-4"><button type="button" onclick="closeGradeSubmissionModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button><button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Submit Grade</button></div></form></div></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+
+        // --- Modal Control ---
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const createAssignmentModal = document.getElementById('create-assignment-modal');
+        const gradeSubmissionModal = document.getElementById('grade-submission-modal');
+        function openEditProfileModal() {
+            const contact = document.getElementById('profile-contact').innerText;
+            const address = document.getElementById('profile-address').innerText;
+            document.getElementById('contactNumber').value = contact !== 'Not provided' ? contact : '';
+            document.getElementById('address').value = address !== 'Not provided' ? address : '';
+            editProfileModal.classList.remove('hidden');
+            editProfileModal.classList.add('flex');
+        }
+        function closeEditProfileModal() { editProfileModal.classList.add('hidden'); editProfileModal.classList.remove('flex'); }
+        function openCreateAssignmentModal() { loadCoursesForDropdown(); createAssignmentModal.classList.remove('hidden'); createAssignmentModal.classList.add('flex'); }
+        function closeCreateAssignmentModal() { createAssignmentModal.classList.add('hidden'); createAssignmentModal.classList.remove('flex'); }
+        function openGradeSubmissionModal(submission, assignmentId) { 
+            document.getElementById('submissionId').value = submission._id;
+            document.getElementById('activeAssignmentId').value = assignmentId;
+            document.getElementById('grade-student-name').textContent = submission.student.fullName;
+            document.getElementById('grade-file-url').href = submission.fileUrl || '#';
+            document.getElementById('submission-grade').value = submission.grade !== 'Not Graded' ? submission.grade : '';
+            document.getElementById('submission-feedback').value = submission.feedback || '';
+            gradeSubmissionModal.classList.remove('hidden'); gradeSubmissionModal.classList.add('flex');
+        }
+        function closeGradeSubmissionModal() { gradeSubmissionModal.classList.add('hidden'); gradeSubmissionModal.classList.remove('flex'); }
+
+        // --- Core Functions ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) { window.location.href = 'login.html'; return; }
+            setupEventListeners();
+            navigateTo(window.location.hash || '#profile');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const hash = e.currentTarget.getAttribute('href');
+                    history.pushState(null, null, hash);
+                    navigateTo(hash);
+                });
+            });
+            window.addEventListener('popstate', () => navigateTo(window.location.hash || '#profile'));
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            });
+            document.getElementById('edit-profile-form').addEventListener('submit', handleUpdateProfile);
+            document.getElementById('create-assignment-form').addEventListener('submit', handleCreateAssignment);
+            document.getElementById('grade-submission-form').addEventListener('submit', handleGradeSubmission);
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            options.headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers };
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'An error occurred');
+            return data;
+        }
+
+        function navigateTo(hash) {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            const targetSection = document.querySelector(hash);
+            if (targetLink) targetLink.classList.add('active');
+            if (targetSection) targetSection.classList.add('active');
+            
+            if (hash === '#profile') loadProfile();
+            if (hash === '#courses') loadAssignedCourses();
+            if (hash === '#assignments') showAssignmentsListView();
+            if (hash === '#attendance') {
+               loadCoursesForAttendanceDropdown();
+               setAttendanceDateLimits();   
+            }
+        }
+        function setAttendanceDateLimits() {
+              const dateInput = document.getElementById('attendance-date');
+             const today = new Date();
+             const twoDaysAgo = new Date();
+             twoDaysAgo.setDate(today.getDate() - 2);
+
+             const formatDate = date => date.toISOString().split('T')[0];
+
+              dateInput.max = formatDate(today);
+              dateInput.min = formatDate(twoDaysAgo);
+             }
+        // --- View Switching for Assignments Page ---
+        function showAssignmentsListView() {
+            document.getElementById('assignments-list-view').classList.remove('hidden');
+            document.getElementById('submissions-view').classList.add('hidden');
+            loadFacultyAssignments();
+        }
+
+        function showSubmissionsView(assignmentId, assignmentTitle) {
+            document.getElementById('assignments-list-view').classList.add('hidden');
+            document.getElementById('submissions-view').classList.remove('hidden');
+            document.getElementById('submissions-title').textContent = `Submissions for: ${assignmentTitle}`;
+            loadSubmissionsForAssignment(assignmentId);
+        }
+
+        function formatDateDDMMYYYY(dateStr) {
+           const date = new Date(dateStr);
+           const day = String(date.getDate()).padStart(2, '0');
+           const month = String(date.getMonth() + 1).padStart(2, '0');
+           const year = date.getFullYear();
+           return `${day}-${month}-${year}`;
+         }
+
+
+        // --- Data Loading & Rendering ---
+        async function loadProfile() {
+             try {
+                const user = await apiFetch('/faculty/profile');
+                document.getElementById('welcome-message').textContent = `Welcome, ${user.fullName}`;
+                document.getElementById('profile-content').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div><label class="text-sm text-gray-400">Full Name</label><p class="font-bold text-lg">${user.fullName}</p></div>
+                        <div><label class="text-sm text-gray-400">Email Address</label><p class="font-bold text-lg">${user.email}</p></div>
+                        <div><label class="text-sm text-gray-400">Department</label><p class="font-bold text-lg">${user.department}</p></div>
+                        <div><label class="text-sm text-gray-400">Designation</label><p class="font-bold text-lg">${user.role}</p></div>
+                        <div><label class="text-sm text-gray-400">Contact Number</label><p id="profile-contact" class="font-bold text-lg">${user.contactNumber}</p></div>
+                        <div><label class="text-sm text-gray-400">Address</label><p id="profile-address" class="font-bold text-lg">${user.address}</p></div>
+                    </div>`;
+            } catch (error) { document.getElementById('profile-content').innerHTML = `<p class="text-red-400">Failed to load profile.</p>`; }
+        }
+
+        async function loadAssignedCourses() {
+            const grid = document.getElementById('assigned-courses-grid');
+            try {
+                const courses = await apiFetch('/faculty/courses');
+                if (courses.length === 0) { grid.innerHTML = '<p class="text-gray-400">You are not assigned to any courses.</p>'; return; }
+                grid.innerHTML = courses.map(course => `
+                    <div class="card p-4 rounded-lg">
+                        <h4 class="font-bold text-yellow-400">${course.courseName} (${course.courseCode})</h4>
+                        <p class="text-sm text-gray-400">${course.department} - ${course.credits} Credits</p>
+                        <p class="text-sm text-gray-400 mt-2">${course.description}</p>
+                    </div>`).join('');
+            } catch (error) { grid.innerHTML = `<p class="text-red-400">Failed to load assigned courses.</p>`; }
+        }
+
+        async function loadCoursesForDropdown() {
+            const select = document.getElementById('assignment-course');
+            try {
+                const courses = await apiFetch('/faculty/courses');
+                if (courses.length > 0) {
+                    select.innerHTML = '<option value="">Select a Course</option>' + courses.map(c => `<option value="${c._id}">${c.courseName} (${c.courseCode})</option>`).join('');
+                } else { select.innerHTML = '<option value="">No courses assigned</option>'; }
+            } catch (error) { select.innerHTML = '<option>Could not load courses</option>'; }
+        }
+
+        async function loadFacultyAssignments() {
+            const grid = document.getElementById('assignments-grid');
+            grid.innerHTML = `<p>Loading assignments...</p>`;
+            try {
+                const assignments = await apiFetch('/faculty/assignments');
+                if(assignments.length === 0) { grid.innerHTML = `<p class="text-gray-400">You have not created any assignments yet.</p>`; return; }
+                grid.innerHTML = assignments.map(a => `
+                    <div class="card p-4 rounded-lg">
+                        <h4 class="font-bold text-yellow-400">${a.title}</h4>
+                        <p class="text-sm text-gray-400">For: ${a.course.courseName}</p>
+                        <p class="text-xs mt-2">Due Date: ${new Date(a.dueDate).toLocaleDateString()}</p>
+                        <div class="mt-4">
+                            <button onclick="showSubmissionsView('${a._id}', '${a.title.replace(/'/g, "\\'")}')" class="kgf-button text-xs px-3 py-1 rounded-md">View Submissions</button>
+                        </div>
+                    </div>`).join('');
+            } catch(e) { grid.innerHTML = `<p class="text-red-400">Could not load assignments.</p>`; }
+        }
+        
+        async function loadSubmissionsForAssignment(assignmentId) {
+            const tableBody = document.getElementById('submissions-table-body');
+            tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="5">Loading submissions...</td></tr>`;
+            try {
+                const submissions = await apiFetch(`/faculty/assignments/${assignmentId}/submissions`);
+                if (submissions.length === 0) { tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="5">No submissions yet.</td></tr>`; return; }
+                tableBody.innerHTML = submissions.map(s => {
+                    const isGraded = s.status === 'Graded';
+                    return `
+                    <tr class="table-row border-b border-gray-800">
+                        <td class="p-3">${s.student.fullName}</td>
+                        <td class="p-3">${new Date(s.submittedAt).toLocaleString()}</td>
+                        <td class="p-3"><span class="px-2 py-1 text-xs rounded-full ${isGraded ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}">${s.status}</span></td>
+                        <td class="p-3 font-bold">${s.grade}</td>
+                        <td class="p-3"><button onclick='openGradeSubmissionModal(${JSON.stringify(s)}, "${assignmentId}")' class="kgf-button text-xs px-3 py-1 rounded-md">Grade</button></td>
+                    </tr>`;
+                }).join('');
+            } catch (error) { tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="5">Failed to load submissions.</td></tr>`; }
+        }
+
+        // --- Form Handlers ---
+        async function handleUpdateProfile(e) { e.preventDefault(); const updatedData = { contactNumber: document.getElementById('contactNumber').value, address: document.getElementById('address').value, }; const password = document.getElementById('password').value; if (password) { updatedData.password = password; } try { const result = await apiFetch('/faculty/profile', { method: 'PUT', body: JSON.stringify(updatedData) }); alert(result.message); closeEditProfileModal(); loadProfile(); } catch (error) { alert(`Error: ${error.message}`); } }
+        async function handleCreateAssignment(e) { e.preventDefault(); const assignmentData = { courseId: document.getElementById('assignment-course').value, title: document.getElementById('assignment-title').value, description: document.getElementById('assignment-description').value, dueDate: document.getElementById('assignment-dueDate').value }; if (!assignmentData.courseId) { alert('Please select a course.'); return; } try { const result = await apiFetch('/faculty/assignments', { method: 'POST', body: JSON.stringify(assignmentData) }); alert(result.message); closeCreateAssignmentModal(); loadFacultyAssignments(); } catch (error) { alert(`Error: ${error.message}`); } }
+        async function handleGradeSubmission(e) {
+            e.preventDefault();
+            const submissionId = document.getElementById('submissionId').value;
+            const assignmentId = document.getElementById('activeAssignmentId').value;
+            const gradeData = { grade: document.getElementById('submission-grade').value, feedback: document.getElementById('submission-feedback').value, };
+            try {
+                const result = await apiFetch(`/faculty/submissions/${submissionId}`, { method: 'PUT', body: JSON.stringify(gradeData) });
+                alert(result.message);
+                closeGradeSubmissionModal();
+                loadSubmissionsForAssignment(assignmentId);
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        // ATTENDANCE
+        async function loadCoursesForAttendanceDropdown() {
+            const select = document.getElementById('attendance-course-select');
+            try {
+                const courses = await apiFetch('/faculty/courses');
+                if (courses.length > 0) {
+                    select.innerHTML = '<option value="">Select a Course</option>' + courses.map(c => `<option value="${c._id}">${c.courseName} (${c.courseCode})</option>`).join('');
+                } else { select.innerHTML = '<option value="">No courses assigned</option>'; }
+            } catch (error) { select.innerHTML = '<option>Could not load courses</option>'; }
+        }
+
+
+        async function handleFetchAttendance() {
+            const courseId = document.getElementById('attendance-course-select').value;
+            const date = document.getElementById('attendance-date').value;
+            const tableBody = document.getElementById('attendance-table-body');
+            
+            if (!courseId || !date) { alert('Please select both a course and a date.'); return; }
+
+            document.getElementById('attendance-sheet').classList.remove('hidden');
+            document.getElementById('attendance-placeholder').classList.add('hidden');
+            const courseText = document.getElementById('attendance-course-select').selectedOptions[0].text;
+            document.getElementById('attendance-sheet-title').textContent = `${courseText} on ${formatDateDDMMYYYY(date)}`;
+            tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="2">Loading students...</td></tr>`;
+
+            try {
+                const query = `?courseId=${courseId}&date=${date}`;
+                const attendanceSheet = await apiFetch(`/faculty/attendance${query}`);
+                
+                if (attendanceSheet.length === 0) { tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="2">No students found for this course.</td></tr>`; return; }
+
+                tableBody.innerHTML = attendanceSheet.map(student => `
+                    <tr class="table-row border-b border-gray-800" data-student-id="${student._id}">
+                        <td class="p-3">${student.fullName}</td>
+                        <td class="p-3 attendance-btn-group space-x-2">
+                            <button onclick="markStatus(this, 'Present')" class="px-3 py-1 text-xs rounded-full ${student.status === 'Present' ? 'bg-green-500 text-white active' : 'bg-gray-700 text-gray-300'}">Present</button>
+                            <button onclick="markStatus(this, 'Absent')" class="px-3 py-1 text-xs rounded-full ${student.status === 'Absent' ? 'bg-red-500 text-white active' : 'bg-gray-700 text-gray-300'}">Absent</button>
+                            <button onclick="markStatus(this, 'Late')" class="px-3 py-1 text-xs rounded-full ${student.status === 'Late' ? 'bg-yellow-500 text-black active' : 'bg-gray-700 text-gray-300'}">Late</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) { tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="2">Failed to load attendance sheet.</td></tr>`; }
+        }
+
+        function markStatus(button, status) {
+            const group = button.parentElement;
+            group.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active', 'bg-green-500', 'bg-red-500', 'bg-yellow-500', 'text-white', 'text-black');
+                btn.classList.add('bg-gray-700', 'text-gray-300');
+            });
+            button.classList.add('active');
+            if(status === 'Present') { button.classList.add('bg-green-500', 'text-white'); }
+            if(status === 'Absent') { button.classList.add('bg-red-500', 'text-white'); }
+            if(status === 'Late') { button.classList.add('bg-yellow-500', 'text-black'); }
+        }
+
+        async function handleSaveAttendance() {
+            const courseId = document.getElementById('attendance-course-select').value;
+            const date = document.getElementById('attendance-date').value;
+            const rows = document.querySelectorAll('#attendance-table-body tr');
+            const attendanceData = [];
+
+            rows.forEach(row => {
+                const studentId = row.dataset.studentId;
+                const activeButton = row.querySelector('button.active');
+                if (studentId && activeButton) {
+                    const status = activeButton.innerText;
+                    attendanceData.push({ studentId, status });
+                }
+            });
+
+            if (attendanceData.length === 0) { alert('No attendance data to save.'); return; }
+
+            try {
+                const result = await apiFetch('/faculty/attendance', { method: 'POST', body: JSON.stringify({ courseId, date, attendanceData }) });
+                alert(result.message);
+            } catch (error) { alert(`Error saving attendance: ${error.message}`); }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - University Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* KGF Theme - Dark, Gold, Gritty */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            color: #EAEAEA;
+            background-image:
+                radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.1), transparent 40%),
+                url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+        }
+        .kgf-title { font-family: 'Cinzel', serif; color: #D4AF37; text-shadow: 0 0 10px rgba(212, 175, 55, 0.7); }
+        .sidebar { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-right: 2px solid rgba(212, 175, 55, 0.3); }
+        .nav-link { transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .nav-link:hover { background: rgba(212, 175, 55, 0.1); border-left-color: #D4AF37; color: #D4AF37; }
+        .nav-link.active { background: rgba(212, 175, 55, 0.2); border-left-color: #D4AF37; color: #D4AF37; font-weight: 700; }
+        .card { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.2); }
+        .kgf-button { background: linear-gradient(45deg, #D4AF37, #B8860B); color: #111; font-family: 'Cinzel', serif; font-weight: 700; transition: all 0.3s ease; }
+        .kgf-button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        .kgf-input, .kgf-textarea, .kgf-select { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: #fff; }
+        .kgf-input:focus, .kgf-textarea:focus, .kgf-select:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        .kgf-select option { background-color: #1a1a1a; color: #EAEAEA; }
+        .table-header { background: rgba(212, 175, 55, 0.1); font-family: 'Cinzel', serif; font-weight: 700; color: #D4AF37; }
+        .table-row:hover { background: rgba(212, 175, 55, 0.05); }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-backdrop { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #111; border: 2px solid rgba(212, 175, 55, 0.4); animation: fadeIn 0.3s; }
+        .custom-scrollbar { max-height: 150px; overflow-y: auto; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #222; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #b8860b; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="flex h-screen">
+        <aside class="sidebar w-64 flex-shrink-0">
+            <div class="p-6 text-center border-b border-gray-700/50">
+                <h1 class="kgf-title text-2xl tracking-widest">ADMIN</h1>
+                <p class="text-sm text-gray-400">CONTROL PANEL</p>
+            </div>
+            <nav id="sidebar-nav" class="mt-8">
+                <a href="#dashboard" class="nav-link active flex items-center px-6 py-3"><i class="fas fa-tachometer-alt w-8 text-center"></i><span>Dashboard</span></a>
+                <a href="#user-management" class="nav-link flex items-center px-6 py-3"><i class="fas fa-users-cog w-8 text-center"></i><span>Users</span></a>
+                <a href="#courses" class="nav-link flex items-center px-6 py-3"><i class="fas fa-book w-8 text-center"></i><span>Courses</span></a>
+                <a href="#timetable" class="nav-link flex items-center px-6 py-3"><i class="fas fa-calendar-alt w-8 text-center"></i><span>Timetable</span></a>
+                <a href="#requests" class="nav-link flex items-center px-6 py-3"><i class="fas fa-file-alt w-8 text-center"></i><span>Requests</span></a>
+                <a href="#security" class="nav-link flex items-center px-6 py-3"><i class="fas fa-shield-alt w-8 text-center"></i><span>Security</span></a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 flex flex-col">
+            <header class="flex items-center justify-between p-4 bg-gray-900/50 border-b border-gray-700/50">
+                <div><h2 id="welcome-message" class="text-xl font-bold text-gray-300">Welcome, Administrator</h2></div>
+                <button id="logout-button" class="kgf-button px-4 py-2 rounded-lg text-sm flex items-center"><i class="fas fa-sign-out-alt mr-2"></i>LOGOUT</button>
+            </header>
+
+            <div class="flex-1 p-8 overflow-y-auto">
+                <section id="dashboard" class="content-section active"><h2 class="kgf-title text-3xl mb-6">System Overview</h2></section>
+
+                <section id="user-management" class="content-section">
+                     <div class="flex justify-between items-center mb-6">
+                        <h2 class="kgf-title text-3xl">User Management</h2>
+                        <button onclick="openCreateUserModal()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Add User</button>
+                    </div>
+                    <div class="card p-4 rounded-lg mb-6 flex items-center gap-4">
+                        <div class="relative flex-grow"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i><input type="text" placeholder="Search by name or email..." class="kgf-input w-full p-2 pl-10 rounded-lg"></div>
+                        <select class="kgf-select p-2 rounded-lg"><option>Filter by Role</option><option>Student</option><option>Faculty</option></select>
+                        <select class="kgf-select p-2 rounded-lg"><option>Filter by Department</option><option>Computer Science</option><option>Administration</option></select>
+                    </div>
+                    <div class="card p-6 rounded-lg overflow-x-auto">
+                        <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Full Name</th><th class="p-3">Email</th><th class="p-3">Role</th><th class="p-3">Department</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr></thead><tbody id="users-table-body"></tbody></table>
+                    </div>
+                </section>
+                
+                <section id="courses" class="content-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="kgf-title text-3xl">Course Management</h2>
+                        <button onclick="openCourseModal()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>Add Course</button>
+                    </div>
+                    <div class="card p-6 rounded-lg overflow-x-auto">
+                        <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Course Code</th><th class="p-3">Course Name</th><th class="p-3">Department</th><th class="p-3">Credits</th><th class="p-3">Assigned Faculty</th><th class="p-3">Actions</th></tr></thead><tbody id="courses-table-body"></tbody></table>
+                    </div>
+                </section>
+                
+                <section id="timetable" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Timetable Management</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <h3 class="kgf-title text-xl mb-4">Find Timetable</h3>
+                            <div class="card p-4 rounded-lg mb-6"><form id="find-timetable-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"><div><label class="text-sm text-gray-400">Department</label><select id="search-department" class="kgf-select w-full p-2 rounded-lg mt-1 custom-scrollbar" required></select></div><div><label class="text-sm text-gray-400">Year</label><select id="search-year" class="kgf-select w-full p-2 rounded-lg mt-1" required><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div><div><label class="text-sm text-gray-400">Section</label><select id="search-section" class="kgf-select w-full p-2 rounded-lg mt-1" required><option value="">Select</option><option>1</option><option>2</option><option>3</option></select></div><button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Search</button></form></div>
+                            <div id="timetable-display-area" class="card p-6 rounded-lg min-h-[400px] flex items-center justify-center"><p class="text-gray-500">Select filters and search to view a timetable.</p></div>
+                        </div>
+                        <div>
+                            <h3 class="kgf-title text-xl mb-4">Upload New Timetable</h3>
+                            <div class="card p-6 rounded-lg"><form id="upload-timetable-form" class="space-y-4"><div><label class="text-sm text-gray-400">Department</label><select id="upload-department" class="kgf-select w-full p-2 rounded-lg mt-1 custom-scrollbar" required></select></div><div><label class="text-sm text-gray-400">Year</label><select id="upload-year" class="kgf-select w-full p-2 rounded-lg mt-1" required><option value="">Select Year</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div><div><label class="text-sm text-gray-400">Section</label><select id="upload-section" class="kgf-select w-full p-2 rounded-lg mt-1" required><option value="">Select Section</option><option>1</option><option>2</option><option>3</option></select></div><div><label class="text-sm text-gray-400">Image URL</label><input type="text" id="imageUrl" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="https://example.com/timetable.jpg" required></div><button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Upload Timetable</button></form></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="requests" class="content-section">
+    <h2 class="kgf-title text-3xl mb-6">Hostel Request Management</h2>
+    <div class="card p-4 rounded-lg mb-6 flex items-center gap-4">
+        <div class="relative flex-grow"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i><input type="text" id="request-search-name" placeholder="Search by student name..." class="kgf-input w-full p-2 pl-10 rounded-lg"></div>
+        <select id="request-filter-type" class="kgf-select p-2 rounded-lg"><option value="">Filter by Type</option><option value="mess">Mess Subscription</option><option value="room">Room Transfer</option><option value="complaint">Complaint</option></select>
+        <select id="request-filter-dept" class="kgf-select p-2 rounded-lg custom-scrollbar"></select>
+        <select id="request-filter-status" class="kgf-select p-2 rounded-lg"><option value="Pending">Filter by Status</option><option value="Pending">Pending</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option></select>
+        <button onclick="loadHostelRequests()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-redo-alt"></i></button>
+    </div>
+    <div class="card p-6 rounded-lg overflow-x-auto">
+        <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Student Name</th><th class="p-3">Request Type</th><th class="p-3">Department</th><th class="p-3">Date</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr></thead><tbody id="hostel-requests-table-body"></tbody></table>
+    </div>
+</section>
+                <section id="security" class="content-section"><h2 class="kgf-title text-3xl">Security & Logs (Coming Soon)</h2></section>
+            </div>
+        </main>
+    </div>
+
+    <div id="user-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="modal-content w-full max-w-lg p-8 rounded-2xl shadow-2xl">
+            <h2 id="modal-title" class="kgf-title text-2xl mb-6">Create New User</h2>
+            <form id="user-form" class="space-y-4">
+                <input type="hidden" id="userId">
+                <div><label class="text-sm text-gray-400">Full Name</label><input type="text" id="fullName" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                <div><label class="text-sm text-gray-400">Email</label><input type="email" id="email" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                <div><label class="text-sm text-gray-400">Password (leave blank to not change)</label><input type="password" id="password" class="kgf-input w-full p-2 rounded-lg mt-1"></div>
+                <div><label class="text-sm text-gray-400">Role</label><select id="role" class="kgf-select w-full p-2 rounded-lg mt-1"><option>Student</option><option>Faculty</option><option>Admin</option></select></div>
+                <div><label class="text-sm text-gray-400">Department</label><input type="text" id="department" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeUserModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button>
+                    <button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="modal-content w-full max-w-2xl p-8 rounded-2xl shadow-2xl">
+            <h2 id="course-modal-title" class="kgf-title text-2xl mb-6">Add New Course</h2>
+            <form id="course-form" class="space-y-4">
+                <input type="hidden" id="courseId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-sm text-gray-400">Course Code</label><input type="text" id="courseCode" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                    <div><label class="text-sm text-gray-400">Course Name</label><input type="text" id="courseName" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                    <div><label class="text-sm text-gray-400">Department</label><input type="text" id="courseDepartment" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                    <div><label class="text-sm text-gray-400">Credits</label><input type="number" id="credits" class="kgf-input w-full p-2 rounded-lg mt-1" min="1" max="5" required></div>
+                </div>
+                <div><label class="text-sm text-gray-400">Description</label><textarea id="description" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3"></textarea></div>
+                <div><label class="text-sm text-gray-400">Assign Faculty</label><select id="faculty" class="kgf-select w-full p-2 rounded-lg mt-1"></select></div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeCourseModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button>
+                    <button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Save Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="modal-content w-full max-w-md p-8 rounded-2xl shadow-2xl text-center">
+            <h2 id="delete-modal-title" class="kgf-title text-2xl mb-4">Confirm Deletion</h2>
+            <p id="delete-modal-text" class="text-gray-400 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="flex justify-center gap-4">
+                <button type="button" onclick="closeDeleteModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button>
+                <button id="confirm-delete-button" class="kgf-button bg-red-800 hover:bg-red-700 px-6 py-2 rounded-lg text-sm">Delete</button>
+            </div>
+        </div>
+    </div>
+     <div id="hostel-action-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+    <div class="modal-content w-full max-w-xl p-8 rounded-2xl shadow-2xl">
+        <h2 id="hostel-modal-title" class="kgf-title text-2xl mb-6">Review Hostel Request</h2>
+        <div class="space-y-4">
+            <p><span class="text-gray-400">Student:</span> <span id="hostel-student-name" class="font-bold"></span></p>
+            <p><span class="text-gray-400">Request Type:</span> <span id="hostel-request-type" class="font-bold"></span></p>
+            <div class="card p-4">
+                <p class="text-gray-400 mb-2">Details:</p>
+                <p id="hostel-request-details" class="whitespace-pre-wrap"></p>
+            </div>
+            <div id="approval-section" class="pt-4 border-t border-gray-700/50 space-y-4">
+                <label class="text-sm text-gray-400">Admin/Action Notes (Optional)</label>
+                <textarea id="admin-notes" class="kgf-textarea w-full p-2 rounded-lg" rows="3"></textarea>
+                <div class="flex justify-end gap-4">
+                    <button type="button" onclick="closeHostelActionModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button>
+                    <button type="button" id="reject-action-button" class="px-6 py-2 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-bold">Reject</button>
+                    <button type="button" id="approve-action-button" class="kgf-button px-6 py-2 rounded-lg text-sm">Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+
+        const departments = [
+            'Computer Science', 'Electrical and Electronics', 'Chemical', 'Mechanical',
+            'Aeronautical', 'Manufacturing', 'Design', 'Humanities and Social Science',
+            'Physics', 'Chemistry', 'Mathematics', 'Civil', 'Biotechnology'
+        ];
+
+        // --- Modal Control ---
+        const userModal = document.getElementById('user-modal');
+        const courseModal = document.getElementById('course-modal');
+        const deleteModal = document.getElementById('delete-modal');
+        const userForm = document.getElementById('user-form');
+        const courseForm = document.getElementById('course-form');
+        const userIdInput = document.getElementById('userId');
+        const passwordInput = document.getElementById('password');
+        const modalTitle = document.getElementById('modal-title');
+        
+        function openCreateUserModal() {
+            userForm.reset();
+            userIdInput.value = '';
+            modalTitle.textContent = 'Create New User';
+            passwordInput.setAttribute('required', 'true');
+            userModal.classList.remove('hidden');
+            userModal.classList.add('flex');
+        }
+        function closeUserModal() { userModal.classList.add('hidden'); userModal.classList.remove('flex'); }
+        function openCourseModal() { 
+            courseForm.reset(); 
+            document.getElementById('courseId').value = ''; 
+            document.getElementById('course-modal-title').textContent = 'Add New Course'; 
+            loadFacultyForDropdown(); 
+            courseModal.classList.remove('hidden'); 
+            courseModal.classList.add('flex'); 
+        }
+        function closeCourseModal() { courseModal.classList.add('hidden'); courseModal.classList.remove('flex'); }
+        function closeDeleteModal() { deleteModal.classList.add('hidden'); deleteModal.classList.remove('flex'); }
+        function closeHostelActionModal() { hostelActionModal.classList.add('hidden'); hostelActionModal.classList.remove('flex'); }
+
+        // --- Core Functions ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) { window.location.href = 'login.html'; return; }
+            setupEventListeners();
+            populateDepartmentDropdowns();
+            navigateTo(window.location.hash || '#dashboard');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const hash = e.currentTarget.getAttribute('href');
+                    history.pushState(null, null, hash);
+                    navigateTo(hash);
+                });
+            });
+            window.addEventListener('popstate', () => navigateTo(window.location.hash || '#dashboard'));
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            });
+            userForm.addEventListener('submit', handleSaveUser);
+            courseForm.addEventListener('submit', handleSaveCourse);
+            document.getElementById('find-timetable-form').addEventListener('submit', handleFindTimetable);
+            document.getElementById('upload-timetable-form').addEventListener('submit', handleUploadTimetable);
+            document.getElementById('request-search-name').addEventListener('input', loadHostelRequests);
+            document.getElementById('request-filter-type').addEventListener('change', loadHostelRequests);
+            document.getElementById('request-filter-dept').addEventListener('change', loadHostelRequests);
+            document.getElementById('request-filter-status').addEventListener('change', loadHostelRequests);
+        }
+
+        function navigateTo(hash) {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            const targetSection = document.querySelector(hash);
+            if (targetLink) targetLink.classList.add('active');
+            if (targetSection) targetSection.classList.add('active');
+            
+            if (hash === '#user-management') loadUsers();
+            if (hash === '#courses') loadCourses();
+            if (hash === '#requests') loadHostelRequests();
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            options.headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers };
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'An error occurred');
+            return data;
+        }
+
+        // --- User Management ---
+        async function loadUsers() {
+            const tableBody = document.getElementById('users-table-body');
+            try {
+                const users = await apiFetch('/admin/users');
+                tableBody.innerHTML = users.map(user => `
+                    <tr class="table-row border-b border-gray-800">
+                        <td class="p-3">${user.fullName}</td><td class="p-3">${user.email}</td><td class="p-3">${user.role}</td><td class="p-3">${user.department}</td>
+                        <td class="p-3"><span class="px-2 py-1 text-xs rounded-full bg-green-500/20 text-green-300">Active</span></td>
+                        <td class="p-3 space-x-4">
+                            <button onclick="handleEditUser('${user._id}')" class="text-yellow-400 hover:text-yellow-200"><i class="fas fa-edit"></i></button>
+                            <button onclick="handleDeleteUser('${user._id}')" class="text-red-400 hover:text-red-200"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`).join('');
+            } catch (error) { tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="6">Failed to load users. ${error.message}</td></tr>`; }
+        }
+        
+        async function handleSaveUser(e) {
+            e.preventDefault();
+            const id = userIdInput.value;
+            const isEditMode = !!id;
+            const userData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                role: document.getElementById('role').value,
+                department: document.getElementById('department').value,
+            };
+            const password = passwordInput.value;
+            if (password) { userData.password = password; }
+            const method = isEditMode ? 'PUT' : 'POST';
+            const endpoint = isEditMode ? `/admin/users/${id}` : '/admin/users';
+            try {
+                const result = await apiFetch(endpoint, { method, body: JSON.stringify(userData) });
+                alert(result.message);
+                closeUserModal();
+                loadUsers();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        async function handleEditUser(id) {
+            try {
+                const user = await apiFetch(`/admin/users/${id}`);
+                userForm.reset();
+                modalTitle.textContent = 'Edit User';
+                userIdInput.value = user._id;
+                document.getElementById('fullName').value = user.fullName;
+                document.getElementById('email').value = user.email;
+                document.getElementById('role').value = user.role;
+                document.getElementById('department').value = user.department;
+                passwordInput.removeAttribute('required');
+                userModal.classList.remove('hidden');
+                userModal.classList.add('flex');
+            } catch (error) { alert(`Error fetching user details: ${error.message}`); }
+        }
+
+        function handleDeleteUser(userId) {
+            document.getElementById('delete-modal-title').textContent = 'Delete User';
+            document.getElementById('delete-modal-text').textContent = 'Are you sure you want to delete this user? This action cannot be undone.';
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+            document.getElementById('confirm-delete-button').onclick = () => confirmDelete(userId, 'user');
+        }
+
+        async function confirmDelete(id, type) {
+            const endpoint = type === 'user' ? `/admin/users/${id}` : `/admin/courses/${id}`;
+            const loader = type === 'user' ? loadUsers : loadCourses;
+            try {
+                const result = await apiFetch(endpoint, { method: 'DELETE' });
+                alert(result.message);
+                closeDeleteModal();
+                loader();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+        
+        // --- Course Management ---
+        async function loadCourses() {
+            const tableBody = document.getElementById('courses-table-body');
+            try {
+                const courses = await apiFetch('/admin/courses');
+                tableBody.innerHTML = courses.map(course => `
+                    <tr class="table-row border-b border-gray-800">
+                        <td class="p-3">${course.courseCode}</td><td class="p-3">${course.courseName}</td><td class="p-3">${course.department}</td>
+                        <td class="p-3 text-center">${course.credits}</td><td class="p-3">${course.faculty ? course.faculty.fullName : '<span class="text-gray-500">Not Assigned</span>'}</td>
+                        <td class="p-3 space-x-4">
+                            <button onclick="handleEditCourse('${course._id}')" class="text-yellow-400 hover:text-yellow-200"><i class="fas fa-edit"></i></button>
+                            <button onclick="handleDeleteCourse('${course._id}')" class="text-red-400 hover:text-red-200"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`).join('');
+            } catch (error) { tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="6">Failed to load courses. ${error.message}</td></tr>`; }
+        }
+
+        async function loadFacultyForDropdown(selectedFacultyId = null) {
+            const select = document.getElementById('faculty');
+            try {
+                // Assuming this API endpoint returns users with role: 'Faculty'
+                const facultyList = await apiFetch('/admin/faculty-list'); 
+                select.innerHTML = '<option value="">-- Unassigned --</option>' + 
+                                   facultyList.map(f => `<option value="${f._id}" ${f._id === selectedFacultyId ? 'selected' : ''}>${f.fullName}</option>`).join('');
+            } catch (error) { 
+                console.error("Could not load faculty:", error);
+                select.innerHTML = '<option value="">Could not load faculty</option>'; 
+            }
+        }
+
+        async function handleSaveCourse(e) {
+            e.preventDefault();
+            const id = document.getElementById('courseId').value;
+            const isEditMode = !!id;
+            const facultyId = document.getElementById('faculty').value;
+            const courseData = {
+                courseCode: document.getElementById('courseCode').value,
+                courseName: document.getElementById('courseName').value,
+                department: document.getElementById('courseDepartment').value,
+                description: document.getElementById('description').value,
+                credits: document.getElementById('credits').value,
+                // Only include the faculty field if an ID is selected
+                ...(facultyId && { faculty: facultyId }), 
+            };
+            const method = isEditMode ? 'PUT' : 'POST';
+            const endpoint = isEditMode ? `/admin/courses/${id}` : '/admin/courses';
+            try {
+                const result = await apiFetch(endpoint, { method, body: JSON.stringify(courseData) });
+                alert(result.message);
+                closeCourseModal();
+                loadCourses();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        async function handleEditCourse(id) {
+            try {
+                const course = await apiFetch(`/admin/courses/${id}`);
+                courseForm.reset();
+                document.getElementById('course-modal-title').textContent = 'Edit Course';
+                document.getElementById('courseId').value = course._id;
+                document.getElementById('courseCode').value = course.courseCode;
+                document.getElementById('courseName').value = course.courseName;
+                document.getElementById('courseDepartment').value = course.department;
+                document.getElementById('description').value = course.description;
+                document.getElementById('credits').value = course.credits;
+                // Pass the current faculty ID (or null if unassigned)
+                await loadFacultyForDropdown(course.faculty ? course.faculty._id : null); 
+                courseModal.classList.remove('hidden');
+                courseModal.classList.add('flex');
+            } catch (error) { alert(`Error fetching course details: ${error.message}`); }
+        }
+
+        function handleDeleteCourse(courseId) {
+            document.getElementById('delete-modal-title').textContent = 'Delete Course';
+            document.getElementById('delete-modal-text').textContent = 'Are you sure you want to delete this course? This action cannot be undone.';
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+            document.getElementById('confirm-delete-button').onclick = () => confirmDelete(courseId, 'course');
+        }
+
+        // --- Timetable Management ---
+        // --- Timetable Management & General Helpers ---
+function populateDepartmentDropdowns() {
+    // 1. Get all relevant select elements
+    const searchSelect = document.getElementById('search-department');
+    const uploadSelect = document.getElementById('upload-department');
+    const filterSelect = document.getElementById('request-filter-dept'); // ADDED
+
+    // 2. Prepare the common options HTML
+    let optionsHtml = '<option value="">Select Department</option>'; // Default option for Timetable
+    
+    // For the filter, we need a slightly different default text
+    let filterOptionsHtml = '<option value="">Filter by Department</option>';
+    
+    departments.forEach(dep => {
+        const option = `<option value="${dep}">${dep}</option>`;
+        optionsHtml += option;
+        filterOptionsHtml += option;
+    });
+
+    // 3. Apply the HTML to all elements
+    searchSelect.innerHTML = optionsHtml;
+    uploadSelect.innerHTML = optionsHtml;
+    filterSelect.innerHTML = filterOptionsHtml; // ADDED
+}
+
+        async function handleFindTimetable(e) {
+            e.preventDefault();
+            const displayArea = document.getElementById('timetable-display-area');
+            const department = document.getElementById('search-department').value;
+            const year = document.getElementById('search-year').value;
+            const section = document.getElementById('search-section').value;
+            displayArea.innerHTML = `<p class="text-gray-400">Searching...</p>`;
+            try {
+                const query = `?department=${encodeURIComponent(department)}&year=${year}&section=${section}`;
+                const timetable = await apiFetch(`/admin/timetables/find${query}`);
+                if (!timetable || !timetable.imageUrl) {
+                     displayArea.innerHTML = `<p class="text-yellow-400 text-center">No timetable found for the selected criteria.</p>`;
+                     return;
+                }
+                displayArea.innerHTML = `<img src="${timetable.imageUrl}" alt="Timetable for ${department}" class="max-w-full max-h-full rounded-lg object-contain">`;
+            } catch (error) { 
+                displayArea.innerHTML = `<p class="text-red-400 text-center">${error.message}</p>`; 
+            }
+        }
+
+        async function handleUploadTimetable(e) {
+            e.preventDefault();
+            const form = e.target;
+            const timetableData = {
+                department: document.getElementById('upload-department').value,
+                year: document.getElementById('upload-year').value,
+                section: document.getElementById('upload-section').value,
+                imageUrl: document.getElementById('imageUrl').value,
+            };
+            try {
+                const result = await apiFetch('/admin/timetables', { method: 'POST', body: JSON.stringify(timetableData) });
+                alert(result.message);
+                form.reset();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        async function loadHostelRequests() {
+            const tableBody = document.getElementById('hostel-requests-table-body');
+            const searchName = document.getElementById('request-search-name').value;
+            const filterType = document.getElementById('request-filter-type').value;
+            const filterDept = document.getElementById('request-filter-dept').value;
+            const filterStatus = document.getElementById('request-filter-status').value;
+
+            // Build query string
+            const params = new URLSearchParams();
+            if (searchName) params.append('name', searchName);
+            if (filterType) params.append('type', filterType);
+            if (filterDept) params.append('department', filterDept);
+            if (filterStatus) params.append('status', filterStatus);
+            
+            const queryString = params.toString() ? `?${params.toString()}` : '';
+
+            tableBody.innerHTML = `<tr><td class="p-4 text-center text-yellow-400" colspan="6">Loading requests...</td></tr>`;
+
+            try {
+                // Assuming your backend exposes this endpoint
+                const requests = await apiFetch(`/admin/hostel-requests${queryString}`); 
+                
+                if (requests.length === 0) {
+                     tableBody.innerHTML = `<tr><td class="p-4 text-center text-gray-500" colspan="6">No requests found.</td></tr>`;
+                     return;
+                }
+
+                tableBody.innerHTML = requests.map(req => {
+                    const statusClass = req.status.toLowerCase();
+                    const formattedDate = new Date(req.createdAt).toLocaleDateString();
+                    
+                    let detailsText = '';
+                    if (req.type === 'mess') detailsText = `Mess: ${req.newMessPlan}`;
+                    else if (req.type === 'room') detailsText = `Room: ${req.newRoomNumber}`;
+                    else if (req.type === 'complaint') detailsText = `Subject: ${req.subject}`;
+
+                    return `
+                        <tr class="table-row border-b border-gray-800">
+                            <td class="p-3">${req.studentName}</td>
+                            <td class="p-3">${req.type.toUpperCase().split('').map((c, i) => i === 0 ? c.toUpperCase() : c).join('')}</td>
+                            <td class="p-3">${req.department}</td>
+                            <td class="p-3">${formattedDate}</td>
+                            <td class="p-3"><span class="status-badge ${statusClass}">${req.status}</span></td>
+                            <td class="p-3">
+                                <button onclick="openHostelActionModal('${req._id}', '${req.studentName}', '${req.type}', \`${JSON.stringify(req.details)}\`)" 
+                                    class="text-yellow-400 hover:text-yellow-200" title="Review">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (error) { 
+                tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="6">Failed to load requests. ${error.message}</td></tr>`; 
+            }
+        }
+        
+        // This function dynamically opens the action modal
+        function openHostelActionModal(requestId, studentName, requestType, requestDetails) {
+            const details = JSON.parse(requestDetails);
+            
+            document.getElementById('hostel-modal-title').textContent = `${requestType.toUpperCase()} Request`;
+            document.getElementById('hostel-student-name').textContent = studentName;
+            document.getElementById('hostel-request-type').textContent = requestType.toUpperCase();
+            
+            let detailsHtml = '';
+            if (requestType === 'mess') {
+                detailsHtml = `Current Plan: ${details.currentMessPlan || 'N/A'}\n**Requested Plan:** ${details.newMessPlan}`;
+            } else if (requestType === 'room') {
+                detailsHtml = `Current Room: ${details.currentRoomNumber || 'N/A'}\n**Requested Room:** ${details.newRoomNumber}`;
+            } else if (requestType === 'complaint') {
+                 detailsHtml = `**Subject:** ${details.subject}\n\n**Description:**\n${details.description}`;
+            } else {
+                detailsHtml = JSON.stringify(details, null, 2);
+            }
+            document.getElementById('hostel-request-details').textContent = detailsHtml;
+
+            // Set up button handlers with request ID and action type
+            document.getElementById('approve-action-button').onclick = () => handleApproveAction(requestId, 'Approved');
+            document.getElementById('reject-action-button').onclick = () => handleApproveAction(requestId, 'Rejected');
+            document.getElementById('admin-notes').value = ''; 
+
+            hostelActionModal.classList.remove('hidden');
+            hostelActionModal.classList.add('flex');
+        }
+
+        async function handleApproveAction(requestId, action) {
+            const notes = document.getElementById('admin-notes').value;
+            const button = action === 'Approved' ? document.getElementById('approve-action-button') : document.getElementById('reject-action-button');
+            
+            const originalText = button.textContent;
+            button.textContent = 'Processing...';
+            button.disabled = true;
+
+            try {
+                // Endpoint to update request status (PUT /admin/hostel-requests/:id/status)
+                const result = await apiFetch(`/admin/hostel-requests/${requestId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: action, adminNotes: notes })
+                });
+
+                alert(`${result.message}`);
+                closeHostelActionModal();
+                loadHostelRequests();
+            } catch (error) {
+                alert(`Error processing request: ${error.message}`);
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

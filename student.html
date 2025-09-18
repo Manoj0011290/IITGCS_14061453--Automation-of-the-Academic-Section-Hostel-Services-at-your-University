@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - University Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* KGF Theme - Dark, Gold, Gritty */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            color: #EAEAEA;
+            background-image:
+                radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.1), transparent 40%),
+                url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+        }
+        .kgf-title { font-family: 'Cinzel', serif; color: #D4AF37; text-shadow: 0 0 10px rgba(212, 175, 55, 0.7); }
+        .sidebar { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-right: 2px solid rgba(212, 175, 55, 0.3); }
+        .nav-link { transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .nav-link:hover { background: rgba(212, 175, 55, 0.1); border-left-color: #D4AF37; color: #D4AF37; }
+        .nav-link.active { background: rgba(212, 175, 55, 0.2); border-left-color: #D4AF37; color: #D4AF37; font-weight: 700; }
+        .card { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.2); }
+        .kgf-button { background: linear-gradient(45deg, #D4AF37, #B8860B); color: #111; font-family: 'Cinzel', serif; font-weight: 700; transition: all 0.3s ease; }
+        .kgf-button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        .kgf-input, .kgf-textarea, .kgf-select { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: #fff; }
+        .kgf-input:focus, .kgf-textarea:focus, .kgf-select:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        .kgf-select option { background-color: #1a1a1a; color: #EAEAEA; }
+        .table-header { background: rgba(212, 175, 55, 0.1); font-family: 'Cinzel', serif; font-weight: 700; color: #D4AF37; }
+        .table-row:hover { background: rgba(212, 175, 55, 0.05); }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-backdrop { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #111; border: 2px solid rgba(212, 175, 55, 0.4); animation: fadeIn 0.3s; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar w-64 flex-shrink-0">
+            <div class="p-6 text-center border-b border-gray-700/50">
+                <h1 class="kgf-title text-2xl tracking-widest">STUDENT</h1>
+                <p class="text-sm text-gray-400">PORTAL</p>
+            </div>
+            <nav id="sidebar-nav" class="mt-8">
+                <a href="#profile" class="nav-link active flex items-center px-6 py-3"><i class="fas fa-user-circle w-8 text-center"></i><span>Profile</span></a>
+                <a href="#courses" class="nav-link flex items-center px-6 py-3"><i class="fas fa-book-open w-8 text-center"></i><span>Courses</span></a>
+                <a href="#academics" class="nav-link flex items-center px-6 py-3"><i class="fas fa-graduation-cap w-8 text-center"></i><span>Academics</span></a>
+                <a href="#achievements" class="nav-link flex items-center px-6 py-3"><i class="fas fa-trophy w-8 text-center"></i><span>Achievements</span></a>
+                <a href="#requests" class="nav-link flex items-center px-6 py-3"><i class="fas fa-file-alt w-8 text-center"></i><span>Requests</span></a>
+                <a href="#hostel" class="nav-link flex items-center px-6 py-3"><i class="fas fa-hotel w-8 text-center"></i><span>Hostel Services</span></a>
+                <a href="#resources" class="nav-link flex items-center px-6 py-3"><i class="fas fa-lightbulb w-8 text-center"></i><span>Resources</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col">
+            <header class="flex items-center justify-between p-4 bg-gray-900/50 border-b border-gray-700/50">
+                <div><h2 id="welcome-message" class="text-xl font-bold text-gray-300">Welcome...</h2></div>
+                <button id="logout-button" class="kgf-button px-4 py-2 rounded-lg text-sm flex items-center"><i class="fas fa-sign-out-alt mr-2"></i>LOGOUT</button>
+            </header>
+
+            <div class="flex-1 p-8 overflow-y-auto">
+                <!-- Profile Section -->
+                <section id="profile" class="content-section active">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="kgf-title text-3xl">Personal Profile</h2>
+                         <button onclick="openEditProfileModal()" class="kgf-button px-4 py-2 rounded-lg text-sm"><i class="fas fa-edit mr-2"></i>Edit Profile</button>
+                    </div>
+                    <div id="profile-content" class="card p-6 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-6"><p>Loading profile...</p></div>
+                </section>
+
+                <!-- Courses & Timetable Section -->
+                <section id="courses" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Course Management</h2>
+                    <div class="card p-6 rounded-lg mb-8">
+                        <h3 class="kgf-title text-xl mb-4">My Enrolled Courses</h3>
+                        <div id="my-courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p>Loading enrolled courses...</p></div>
+                    </div>
+                    <div class="card p-6 rounded-lg">
+                        <h3 class="kgf-title text-xl mb-4">Register for New Courses</h3>
+                        <div class="overflow-x-auto">
+                             <table class="w-full text-left">
+                                 <thead class="table-header"><tr><th class="p-3">Course Code</th><th class="p-3">Course Name</th><th class="p-3">Faculty</th><th class="p-3">Credits</th><th class="p-3">Action</th></tr></thead>
+                                 <tbody id="available-courses-body"></tbody>
+                             </table>
+                         </div>
+                    </div>
+                </section>
+                
+                <!-- Academics Section -->
+                <section id="academics" class="content-section">
+                     <h2 class="kgf-title text-3xl mb-6">Academic Records</h2>
+                       <div class="card p-6 rounded-lg mb-8">
+                        <h3 class="kgf-title text-xl mb-4">Assignments</h3>
+                        <div id="assignments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p>Loading assignments...</p></div>
+                    </div>
+                       <div class="card p-6 rounded-lg mb-8">
+                        <h3 class="kgf-title text-xl mb-4">Attendance Summary</h3>
+                        <div id="attendance-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><p>Loading attendance...</p></div>
+                    </div>
+                    <div class="card p-6 rounded-lg">
+                        <h3 class="kgf-title text-xl mb-4">Grades & Reports</h3>
+                         <div class="flex justify-end mb-4"><button class="kgf-button text-xs px-4 py-2 rounded-md"><i class="fas fa-download mr-2"></i>Download Report</button></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Subject</th><th class="p-3">Internal Marks</th><th class="p-3">External Marks</th><th class="p-3">Grade</th><th class="p-3">Remarks</th></tr></thead><tbody id="grades-body"></tbody></table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Achievements Section -->
+                <section id="achievements" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Achievements & Badges</h2>
+                    <div id="achievements-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        <div class="card p-6 rounded-lg text-center flex flex-col items-center justify-center aspect-square"><i class="fas fa-star text-5xl text-yellow-400"></i><p class="mt-4 font-bold">Top Performer</p><p class="text-xs text-gray-400">Semester 2</p></div>
+                        <div class="card p-6 rounded-lg text-center flex flex-col items-center justify-center aspect-square"><i class="fas fa-check-circle text-5xl text-green-400"></i><p class="mt-4 font-bold">Perfect Attendance</p><p class="text-xs text-gray-400">October</p></div>
+                        <div class="card p-6 rounded-lg text-center flex flex-col items-center justify-center aspect-square opacity-40"><i class="fas fa-medal text-5xl text-gray-500"></i><p class="mt-4 font-bold">Project Champion</p><p class="text-xs text-gray-400">(Locked)</p></div>
+                    </div>
+                </section>
+
+                <!-- Requests Section -->
+                <section id="requests" class="content-section">
+                    <h2 class="kgf-title text-3xl mb-6">Documents & Requests</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="card p-6 rounded-lg">
+                             <h3 class="kgf-title text-xl mb-4">Apply for Leave</h3>
+                             <form id="leave-form" class="space-y-4">
+                                <div><label class="text-sm text-gray-400">Leave Type</label><input type="text" id="leaveType" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="e.g., Medical, Personal" required></div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-sm text-gray-400">Start Date</label><input type="date" id="startDate" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                                    <div><label class="text-sm text-gray-400">End Date</label><input type="date" id="endDate" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                                </div>
+                                <div><label class="text-sm text-gray-400">Reason</label><textarea id="reason" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3" required></textarea></div>
+                                <button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Submit Request</button>
+                            </form>
+                        </div>
+                         <div class="card p-6 rounded-lg">
+                            <h3 class="kgf-title text-xl mb-4">Leave History</h3>
+                             <div class="overflow-y-auto max-h-96">
+                                <table class="w-full text-left"><thead class="table-header"><tr><th class="p-3">Type</th><th class="p-3">Dates</th><th class="p-3">Status</th></tr></thead><tbody id="leave-history-body"></tbody></table>
+                             </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="hostel" class="content-section">
+    <h2 class="kgf-title text-3xl mb-6">Hostel & Amenities Services</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="card p-6 rounded-lg lg:col-span-1">
+            <h3 class="kgf-title text-xl mb-4">Update Mess Subscription</h3>
+            <form id="mess-form" class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-400">Subscription Type</label>
+                    <select id="messType" class="kgf-select w-full p-2 rounded-lg mt-1" required>
+                        <option value="">Select Option</option>
+                        <option value="Full-Board">Full Board (Breakfast, Lunch, Dinner)</option>
+                        <option value="Breakfast-Only">Breakfast Only</option>
+                        <option value="None">Cancel for Next Month</option>
+                    </select>
+                </div>
+                <div><label class="text-sm text-gray-400">Effective Month</label><input type="month" id="messMonth" class="kgf-input w-full p-2 rounded-lg mt-1" required></div>
+                <button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Update Mess Plan</button>
+            </form>
+        </div>
+
+        <div class="card p-6 rounded-lg lg:col-span-1">
+            <h3 class="kgf-title text-xl mb-4">Room Transfer Request</h3>
+            <form id="transfer-form" class="space-y-4">
+                <div><label class="text-sm text-gray-400">Reason for Transfer</label><input type="text" id="transferReason" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="e.g., Medical, change of roommate" required></div>
+                <div><label class="text-sm text-gray-400">Preferred Room Type</label>
+                    <select id="roomType" class="kgf-select w-full p-2 rounded-lg mt-1" required>
+                        <option value="">Select Type</option>
+                        <option value="Single">Single Occupancy</option>
+                        <option value="Double">Double Occupancy</option>
+                        <option value="Triple">Triple Occupancy</option>
+                    </select>
+                </div>
+                <button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Request Transfer</button>
+            </form>
+        </div>
+
+        <div class="card p-6 rounded-lg lg:col-span-1">
+            <h3 class="kgf-title text-xl mb-4">Register Complaint</h3>
+            <form id="complaint-form" class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-400">Complaint Type</label>
+                    <select id="complaintType" class="kgf-select w-full p-2 rounded-lg mt-1" required>
+                        <option value="">Select Type</option>
+                        <option value="Infrastructure">Infrastructure (Plumbing, Electrical, Furniture)</option>
+                        <option value="Gym">Gym/Equipment Issue</option>
+                        <option value="Sports">Sports Facility Issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div><label class="text-sm text-gray-400">Description</label><textarea id="complaintDescription" class="kgf-textarea w-full p-2 rounded-lg mt-1" rows="3" required></textarea></div>
+                <button type="submit" class="kgf-button w-full py-2 rounded-lg text-sm">Submit Complaint</button>
+            </form>
+        </div>
+    </div>
+</section>
+                <section id="resources" class="content-section"><h2 class="kgf-title text-3xl">Learning Resources (Coming Soon)</h2></section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="modal-content w-full max-w-lg p-8 rounded-2xl shadow-2xl">
+            <h2 class="kgf-title text-2xl mb-6">Edit Profile & Security</h2>
+            <form id="edit-profile-form" class="space-y-4">
+                 <div><label class="text-sm text-gray-400">Full Name</label><input type="text" id="edit-fullName" class="kgf-input w-full p-2 rounded-lg mt-1" disabled></div>
+                <div><label class="text-sm text-gray-400">New Password</label><input type="password" id="edit-password" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="Leave blank to not change"></div>
+                <div><label class="text-sm text-gray-400">Confirm New Password</label><input type="password" id="confirm-password" class="kgf-input w-full p-2 rounded-lg mt-1" placeholder="Confirm new password"></div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeEditProfileModal()" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">Cancel</button>
+                    <button type="submit" class="kgf-button px-6 py-2 rounded-lg text-sm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('authToken');
+
+        // --- Modal Control ---
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        function openEditProfileModal() { editProfileModal.classList.remove('hidden'); editProfileModal.classList.add('flex'); }
+        function closeEditProfileModal() { editProfileModal.classList.add('hidden'); editProfileModal.classList.remove('flex'); }
+
+        // --- Core Functions ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) { window.location.href = 'login.html'; return; }
+            setupEventListeners();
+            navigateTo(window.location.hash || '#profile');
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const hash = e.currentTarget.getAttribute('href');
+                    history.pushState(null, null, hash);
+                    navigateTo(hash);
+                });
+            });
+            window.addEventListener('popstate', () => navigateTo(window.location.hash || '#profile'));
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            });
+            document.getElementById('leave-form').addEventListener('submit', handleApplyForLeave);
+            document.getElementById('edit-profile-form').addEventListener('submit', handlePasswordReset);
+            document.getElementById('mess-form').addEventListener('submit', handleMessUpdate);
+            document.getElementById('transfer-form').addEventListener('submit', handleTransferRequest);
+            document.getElementById('complaint-form').addEventListener('submit', handleComplaintRegistration);
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            options.headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers };
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'An error occurred');
+            return data;
+        }
+
+        function navigateTo(hash) {
+            document.querySelectorAll('#sidebar-nav a').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            const targetSection = document.querySelector(hash);
+            if (targetLink) targetLink.classList.add('active');
+            if (targetSection) targetSection.classList.add('active');
+            
+            switch (hash) {
+                case '#profile': loadProfile(); break;
+                case '#courses': loadMyCourses(); loadAvailableCourses(); break;
+                case '#academics': loadAssignments(); loadGrades(); loadAttendance(); break;
+                case '#requests': loadLeaveHistory(); break;
+            }
+        }
+        
+        // --- Data Loading & Rendering ---
+        async function loadProfile() {
+            try {
+                const data = await apiFetch('/student/profile');
+                document.getElementById('welcome-message').textContent = `Welcome, ${data.fullName}`;
+                document.getElementById('profile-content').innerHTML = `
+                    <div><label class="text-sm text-gray-400">Full Name</label><p class="font-bold text-lg">${data.fullName}</p></div>
+                    <div><label class="text-sm text-gray-400">Email Address</label><p class="font-bold text-lg">${data.email}</p></div>
+                    <div><label class="text-sm text-gray-400">Department</label><p class="font-bold text-lg">${data.department}</p></div>
+                    <div><label class="text-sm text-gray-400">Current Semester</label><p class="font-bold text-lg">3rd</p></div>
+                    <div><label class="text-sm text-gray-400">Role</label><p class="font-bold text-lg">${data.role}</p></div>`;
+                document.getElementById('edit-fullName').value = data.fullName;
+            } catch (error) { document.getElementById('profile-content').innerHTML = `<p class="text-red-400">Failed to load profile.</p>`; }
+        }
+        
+        async function loadAssignments() {
+             const assignmentsGrid = document.getElementById('assignments-grid');
+            try {
+                const data = await apiFetch('/student/assignments');
+                if (data.length > 0) {
+                    assignmentsGrid.innerHTML = data.map(a => `
+                        <div class="card p-6 rounded-lg">
+                            <h3 class="font-bold text-lg text-yellow-400">${a.subject}</h3><p class="text-sm text-gray-400 mt-1">${a.title}</p>
+                            <p class="text-xs mt-4">Due Date: <span class="font-bold">${new Date(a.dueDate).toLocaleDateString()}</span></p>
+                            <div class="mt-4 flex justify-between items-center">
+                                <span class="px-3 py-1 text-xs rounded-full ${a.status === 'Submitted' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${a.status}</span>
+                                <button class="kgf-button text-xs px-3 py-1 rounded-md">Submit</button>
+                            </div>
+                        </div>`).join('');
+                } else { assignmentsGrid.innerHTML = `<p class="text-gray-500">No assignments found.</p>`; }
+            } catch (error) { assignmentsGrid.innerHTML = `<p class="text-red-400">Failed to load assignments.</p>`; }
+        }
+
+        async function handleMessUpdate(e) {
+    e.preventDefault();
+    const form = e.target;
+    const messData = {
+        subscriptionType: document.getElementById('messType').value,
+        effectiveMonth: document.getElementById('messMonth').value,
+    };
+    
+    try {
+        // Assume backend endpoint for mess subscription is /student/hostel/mess
+        const result = await apiFetch('/student/hostel/mess', { 
+            method: 'POST', 
+            body: JSON.stringify(messData) 
+        });
+        alert(`Mess subscription update submitted successfully! Status: ${result.status || 'Pending Review'}`);
+        form.reset();
+        // You would typically load a "Mess History" table here if it existed
+    } catch (error) { 
+        alert(`Error submitting mess update: ${error.message}`); 
+    }
+}
+
+async function handleTransferRequest(e) {
+    e.preventDefault();
+    const form = e.target;
+    const transferData = {
+        reason: document.getElementById('transferReason').value,
+        preferredRoomType: document.getElementById('roomType').value,
+    };
+
+    try {
+        // Assume backend endpoint for room transfer is /student/hostel/transfer
+        const result = await apiFetch('/student/hostel/transfer', {
+            method: 'POST',
+            body: JSON.stringify(transferData)
+        });
+        alert(`Room transfer request submitted successfully! Status: ${result.status || 'Pending Review'}`);
+        form.reset();
+    } catch (error) {
+        alert(`Error submitting transfer request: ${error.message}`);
+    }
+}
+
+async function handleComplaintRegistration(e) {
+    e.preventDefault();
+    const form = e.target;
+    const complaintData = {
+        type: document.getElementById('complaintType').value,
+        description: document.getElementById('complaintDescription').value,
+    };
+
+    try {
+        // Assume backend endpoint for complaints is /student/hostel/complaint
+        const result = await apiFetch('/student/hostel/complaint', {
+            method: 'POST',
+            body: JSON.stringify(complaintData)
+        });
+        alert(`Complaint registered successfully! Ticket ID: ${result.ticketId || 'N/A'}`);
+        form.reset();
+        // You might load a "Complaint Status" list here
+    } catch (error) {
+        alert(`Error registering complaint: ${error.message}`);
+    }
+}
+
+        async function loadGrades() {
+            const gradesBody = document.getElementById('grades-body');
+            try {
+                const data = await apiFetch('/student/grades');
+                if (data.length > 0) {
+                    gradesBody.innerHTML = data.map(g => `
+                        <tr class="border-b border-gray-700/50 table-row">
+                            <td class="p-3 font-bold">${g.subject}</td><td class="p-3">${g.internalMarks}</td><td class="p-3">${g.externalMarks}</td>
+                            <td class="p-3 font-bold text-green-400">${g.grade}</td><td class="p-3 text-sm text-gray-400">${g.remarks || '-'}</td>
+                        </tr>`).join('');
+                } else { gradesBody.innerHTML = `<tr><td class="p-4 text-center" colspan="5">No grades found.</td></tr>`; }
+            } catch (error) { gradesBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="5">Failed to load grades.</td></tr>`; }
+        }
+        
+        // student.html -> inside the <script> tag
+
+async function loadAttendance() {
+    const attendanceGrid = document.getElementById('attendance-grid');
+    // Set a loading state
+    attendanceGrid.innerHTML = `<p>Loading attendance...</p>`; 
+    
+    try {
+        // Fetch real data from your new backend endpoint
+        const attendanceData = await apiFetch('/student/attendance-summary');
+        
+        if (attendanceData.length > 0) {
+            // If data is returned, map over it and create the HTML
+            attendanceGrid.innerHTML = attendanceData.map(att => `
+                <div class="card p-4 rounded-lg text-center">
+                    <p class="font-bold text-2xl ${att.percentage < 75 ? 'text-red-400' : 'text-green-400'}">${att.percentage}%</p>
+                    <p class="text-sm text-gray-400">${att.subject}</p>
+                </div>
+            `).join('');
+        } else {
+            // Handle the case where there's no attendance data
+            attendanceGrid.innerHTML = `<p class="text-gray-500 col-span-full">No attendance data available.</p>`;
+        }
+    } catch (error) {
+        // Display an error message if the API call fails
+        attendanceGrid.innerHTML = `<p class="text-red-400 col-span-full">Failed to load attendance data.</p>`;
+    }
+}
+        
+        async function loadLeaveHistory() {
+             const leaveHistoryBody = document.getElementById('leave-history-body');
+            try {
+                const data = await apiFetch('/student/leave-history');
+                if (data.length > 0) {
+                    leaveHistoryBody.innerHTML = data.map(l => `
+                        <tr class="border-b border-gray-700/50 table-row">
+                            <td class="p-3">${l.leaveType}</td>
+                            <td class="p-3">${new Date(l.startDate).toLocaleDateString()} - ${new Date(l.endDate).toLocaleDateString()}</td>
+                            <td class="p-3"><span class="${l.status === 'Approved' ? 'text-green-400' : l.status === 'Rejected' ? 'text-red-400' : 'text-yellow-400'} font-bold">${l.status}</span></td>
+                        </tr>`).join('');
+                } else { leaveHistoryBody.innerHTML = `<tr><td class="p-4 text-center" colspan="3">No leave history found.</td></tr>`; }
+            } catch (error) { leaveHistoryBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="3">Failed to load history.</td></tr>`; }
+        }
+
+        async function handleApplyForLeave(e) {
+            e.preventDefault();
+            const form = e.target;
+            const leaveData = {
+                leaveType: document.getElementById('leaveType').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                reason: document.getElementById('reason').value,
+            };
+            try {
+                const result = await apiFetch('/student/apply-leave', { method: 'POST', body: JSON.stringify(leaveData) });
+                alert(result.message);
+                form.reset();
+                loadLeaveHistory();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        async function handlePasswordReset(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('edit-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            if (newPassword !== confirmPassword) { alert('Passwords do not match.'); return; }
+            if (!newPassword) { closeEditProfileModal(); return; }
+            try {
+                alert('Password reset functionality is ready to be connected to the backend.');
+                closeEditProfileModal();
+            } catch (error) { alert(`Error: ${error.message}`); }
+        }
+
+        // --- COURSE REGISTRATION FUNCTIONS ---
+        async function loadMyCourses() {
+            const myCoursesGrid = document.getElementById('my-courses-grid');
+            myCoursesGrid.innerHTML = `<p>Loading enrolled courses...</p>`;
+            try {
+                const courses = await apiFetch('/student/my-courses');
+                if (courses.length === 0) {
+                    myCoursesGrid.innerHTML = `<p class="text-gray-400 col-span-full">You are not enrolled in any courses. Register for a course below.</p>`;
+                    return;
+                }
+                myCoursesGrid.innerHTML = courses.map(course => `
+                    <div class="card p-4 rounded-lg">
+                        <h4 class="font-bold text-yellow-400">${course.courseName} (${course.courseCode})</h4>
+                        <p class="text-sm text-gray-400">Faculty: ${course.faculty ? course.faculty.fullName : 'TBD'}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                myCoursesGrid.innerHTML = `<p class="text-red-400">Failed to load your courses.</p>`;
+            }
+        }
+
+        async function loadAvailableCourses() {
+            const tableBody = document.getElementById('available-courses-body');
+            tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="5">Loading available courses...</td></tr>`;
+            try {
+                const courses = await apiFetch('/student/courses/available');
+                if (courses.length === 0) {
+                    tableBody.innerHTML = `<tr><td class="p-4 text-center" colspan="5">No new courses available for registration in your department.</td></tr>`;
+                    return;
+                }
+                tableBody.innerHTML = courses.map(course => `
+                    <tr class="table-row border-b border-gray-800">
+                        <td class="p-3">${course.courseCode}</td>
+                        <td class="p-3 font-bold">${course.courseName}</td>
+                        <td class="p-3">${course.faculty ? course.faculty.fullName : 'TBD'}</td>
+                        <td class="p-3 text-center">${course.credits}</td>
+                        <td class="p-3">
+                            <button onclick="handleEnroll('${course._id}')" class="kgf-button text-xs px-4 py-2 rounded-md">Enroll</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-400" colspan="5">${error.message}</td></tr>`;
+            }
+        }
+
+        async function handleEnroll(courseId) {
+            if (!confirm('Are you sure you want to enroll in this course?')) { return; }
+            try {
+                const result = await apiFetch('/student/courses/enroll', {
+                    method: 'POST',
+                    body: JSON.stringify({ courseId })
+                });
+                alert(result.message);
+                loadMyCourses();
+                loadAvailableCourses();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
+
