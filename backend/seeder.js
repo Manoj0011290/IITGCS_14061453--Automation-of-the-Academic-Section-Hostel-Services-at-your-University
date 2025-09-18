@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('./models/User'); // Adjust path if needed
 
 // --- IMPORTANT: Paste your MongoDB connection string here ---
-const MONGO_URI = "mongodb+srv://manojgowda259058_db_user:9vRMYzojdKCpAgrU@cluster0.hcelnon.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = "YOUR_DATABASE_CONNECTION_STRING";
 
 const connectDB = async () => {
     try {
@@ -70,4 +70,5 @@ if (process.argv[2] === '-d') {
     destroyData();
 } else {
     importData();
+
 }
