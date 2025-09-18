@@ -5,15 +5,25 @@ A comprehensive, full-stack MERN application designed to automate and streamline
 This project was developed as a part of the curriculum, demonstrating proficiency in modern web technologies, database management, and secure authentication practices.
 ## Table of Contents
 About The Project
+
 ✨ Features
+
 🛠️ Tech Stack
+
 🏗️ System Architecture
+
 🗃️ Database Schema
+
 🚀 Getting Started
+
     ---------->Prerequisites
+    
     ---------->Local Setup
+    
 ▶️ Usage
+
 📜 License
+
 📧 Contact
 
 ## About The Project
