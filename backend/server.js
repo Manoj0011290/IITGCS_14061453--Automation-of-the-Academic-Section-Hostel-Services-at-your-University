@@ -1,4 +1,4 @@
-const express = require('express');
+àconst express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 // Ensure your MongoDB connection string is correctly pasted here
-const MONGO_URI = "mongodb+srv://manojgowda259058_db_user:9vRMYzojdKCpAgrU@cluster0.hcelnon.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"; 
+const MONGO_URI = "YOUR_DATABASE_CONNECTION_STRING"; 
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB"))
@@ -35,4 +35,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
